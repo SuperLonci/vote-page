@@ -29,10 +29,20 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 		? existingAnswers 
 		: existingAnswers.map(a => ({ ...a, value: 'HIDDEN' }));
 
+	// 5. Determine if the bet is in read-only mode
+	const now = new Date();
+	const isReadOnly = now > bet.resolveDate || 
+		(bet.endOfEntryEnabled && bet.endOfEntryDate && now > bet.endOfEntryDate);
+
+	// 6. Determine if the win item should be shown
+	const shouldShowWin = bet.canBeWon && (!bet.isWinSecret || now > bet.resolveDate);
+
 	return {
 		bet,
 		answers: safeAnswers,
-		hasAnswered
+		hasAnswered,
+		isReadOnly,
+		shouldShowWin
 	};
 };
 
@@ -44,6 +54,21 @@ export const actions = {
 		const betId = params.id;
 
 		if (!userName || !value) return fail(400, { missing: true });
+
+		// Check if bet is in read-only mode
+		const bet = await db.query.bets.findFirst({
+			where: eq(bets.id, betId)
+		});
+
+		if (!bet) return fail(404, { notFound: true });
+
+		const now = new Date();
+		const isReadOnly = now > bet.resolveDate || 
+			(bet.endOfEntryEnabled && bet.endOfEntryDate && now > bet.endOfEntryDate);
+
+		if (isReadOnly) {
+			return fail(403, { readOnly: true });
+		}
 
 		// Save answer to DB
 		await db.insert(answers).values({

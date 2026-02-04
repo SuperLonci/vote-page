@@ -23,6 +23,7 @@ A web application to create bets and collect answers from friends. Share a bet, 
 
 ```sh
 npm install
+npx drizzle-kit push
 ```
 
 ### Development

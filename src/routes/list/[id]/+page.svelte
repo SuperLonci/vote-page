@@ -1,77 +1,207 @@
 <script>
 	let { data } = $props();
+	
+	function formatDate(date) {
+		return new Date(date).toLocaleDateString('en-US', { 
+			weekday: 'short', 
+			year: 'numeric', 
+			month: 'short', 
+			day: 'numeric' 
+		});
+	}
+
+	const funnyMessages = [
+		"🤐 There's a mysterious prize waiting... (It's a secret!)",
+		"🎁 Something special is hidden inside... 👀",
+		"🎭 A surprise awaits the winner! (Not telling what it is...)",
+		"🔐 Top secret prize locked away... Find out on resolve day!",
+		"🎪 The prize is in another castle! Or is it? 🤔",
+		"✨ Magic happens after resolve date... Trust me!",
+		"🕵️ Classified information: Prize details unknown",
+		"🎯 What do you win? All will be revealed... eventually!"
+	];
+
+	const randomFunnyMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
 </script>
 
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-	<div class="space-y-8">
-		
-		<div class="text-center space-y-4">
-			<h1 class="text-4xl font-extrabold tracking-tight text-gray-900">
-				{data.bet.title}
-			</h1>
-			{#if data.bet.description}
-				<p class="text-lg text-gray-600">
-					{data.bet.description}
-				</p>
-			{/if}
-		</div>
-
-		<!-- Answer Form (only if hasn't answered) -->
-		{#if !data.hasAnswered}
-			<form method="POST" action="?/submitAnswer" class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 space-y-6">
-				<div>
-					<label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-					<input 
-						type="text" 
-						name="userName" 
-						id="userName"
-						required 
-						placeholder="Enter your name" 
-						class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
-					/>
-				</div>
-
-				<div>
-					<label for="value" class="block text-sm font-medium text-gray-700 mb-1">Your Answer</label>
-					<input 
-						type={data.bet.answerType === 'number' ? 'number' : data.bet.answerType === 'date' ? 'date' : 'text'}
-						name="value" 
-						id="value"
-						required 
-						placeholder={data.bet.answerType === 'number' ? 'Enter a number' : data.bet.answerType === 'date' ? 'Select a date' : 'Enter your answer'}
-						class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
-					/>
-				</div>
-
-				<button 
-					type="submit"
-					class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg hover:shadow-xl"
-				>
-					Submit Answer
-				</button>
-			</form>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+	<!-- Creator Info - Always at top -->
+	<div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-8 lg:hidden">
+		<p class="text-sm text-indigo-700">
+			<span class="font-semibold">Created by:</span> {data.bet.creatorName}
+		</p>
+		{#if data.isReadOnly}
+			<p class="text-sm text-red-700 mt-2">
+				<span class="font-semibold">Status:</span> Read-only mode - Voting is closed
+			</p>
 		{/if}
+	</div>
 
-		<!-- Existing Answers -->
-		<div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-			<h2 class="text-2xl font-bold text-gray-800 mb-6">Answers ({data.answers.length})</h2>
-			
-			{#if data.answers.length === 0}
-				<p class="text-gray-500">No answers yet. Be the first to answer!</p>
-			{:else}
-				<div class="space-y-4">
-					{#each data.answers as answer}
-						<div class="border-l-4 border-indigo-600 pl-4 py-2">
-							<p class="font-semibold text-gray-800">{answer.userName}</p>
-							<p class="text-gray-600">{answer.value}</p>
-							<p class="text-sm text-gray-400">
-								{new Date(answer.createdAt).toLocaleDateString()}
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+		<!-- Main Content (Left side on wide screens) -->
+		<div class="lg:col-span-2 space-y-8">
+			<!-- Bet Title and Description -->
+			<div class="text-center lg:text-left space-y-4">
+				<h1 class="text-4xl font-extrabold tracking-tight text-gray-900">
+					{data.bet.title}
+				</h1>
+				{#if data.bet.description}
+					<p class="text-lg text-gray-600">
+						{data.bet.description}
+					</p>
+				{/if}
+			</div>
+
+			<!-- Answer Form (only if hasn't answered and not read-only) -->
+			{#if !data.hasAnswered && !data.isReadOnly}
+				<form method="POST" action="?/submitAnswer" class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 space-y-6">
+					<div>
+						<label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+						<input 
+							type="text" 
+							name="userName" 
+							id="userName"
+							required 
+							placeholder="Enter your name" 
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+						/>
+					</div>
+
+					<div>
+						<label for="value" class="block text-sm font-medium text-gray-700 mb-1">Your Answer</label>
+						<input 
+							type={data.bet.answerType === 'number' ? 'number' : data.bet.answerType === 'date' ? 'date' : 'text'}
+							name="value" 
+							id="value"
+							required 
+							placeholder={data.bet.answerType === 'number' ? 'Enter a number' : data.bet.answerType === 'date' ? 'Select a date' : 'Enter your answer'}
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+						/>
+					</div>
+
+					<button 
+						type="submit"
+						class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg hover:shadow-xl"
+					>
+						Submit Answer
+					</button>
+				</form>
+			{:else if data.isReadOnly && !data.hasAnswered}
+				<div class="bg-gray-100 border border-gray-300 rounded-lg p-6 text-center">
+					<p class="text-gray-600 font-medium">
+						This bet is closed. Voting is no longer accepted.
+					</p>
+				</div>
+			{/if}
+
+			<!-- Existing Answers -->
+			<div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+				<h2 class="text-2xl font-bold text-gray-800 mb-6">Answers ({data.answers.length})</h2>
+				
+				{#if data.answers.length === 0}
+					<p class="text-gray-500">No answers yet. Be the first to answer!</p>
+				{:else}
+					<div class="space-y-4">
+						{#each data.answers as answer}
+							<div class="border-l-4 border-indigo-600 pl-4 py-2">
+								<p class="font-semibold text-gray-800">{answer.userName}</p>
+								<p class="text-gray-600">{answer.value}</p>
+								<p class="text-sm text-gray-400">
+									{new Date(answer.createdAt).toLocaleDateString()}
+								</p>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+
+			<!-- Additional Info on Narrow Screens -->
+			<div class="lg:hidden space-y-4">
+				<!-- Resolve Date -->
+				<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+					<p class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Resolve Date</p>
+					<p class="text-lg font-semibold text-blue-900">{formatDate(data.bet.resolveDate)}</p>
+					<p class="text-xs text-blue-700 mt-1">Voting closes and results revealed</p>
+				</div>
+
+				<!-- End of Entry Date (if applicable) -->
+				{#if data.bet.endOfEntryEnabled && data.bet.endOfEntryDate}
+					<div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+						<p class="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-1">End of Entry</p>
+						<p class="text-lg font-semibold text-orange-900">{formatDate(data.bet.endOfEntryDate)}</p>
+						<p class="text-xs text-orange-700 mt-1">No more votes after this date</p>
+					</div>
+				{/if}
+
+				<!-- Prize Section -->
+				{#if data.bet.canBeWon}
+					{#if data.shouldShowWin && data.bet.winItem}
+						<div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+							<p class="text-lg font-bold text-yellow-900 flex items-center gap-2">
+								🏆 Prize
+							</p>
+							<p class="text-sm text-yellow-800 mt-2">{data.bet.winItem}</p>
+						</div>
+					{:else if data.bet.isWinSecret}
+						<div class="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+							<p class="text-sm font-semibold text-purple-900">
+								{randomFunnyMessage}
 							</p>
 						</div>
-					{/each}
-				</div>
-			{/if}
+					{/if}
+				{/if}
+			</div>
 		</div>
 
+		<!-- Info Sidebar (Right side on wide screens only) -->
+		<div class="hidden lg:block lg:col-span-1">
+			<div class="sticky top-8 space-y-4">
+				<!-- Creator Info and Status -->
+				<div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+					<p class="text-sm text-indigo-700">
+						<span class="font-semibold">Created by:</span> {data.bet.creatorName}
+					</p>
+					{#if data.isReadOnly}
+						<p class="text-sm text-red-700 mt-2">
+							<span class="font-semibold">Status:</span> Read-only mode - Voting is closed
+						</p>
+					{/if}
+				</div>
+
+				<!-- Resolve Date -->
+				<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+					<p class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Resolve Date</p>
+					<p class="text-lg font-semibold text-blue-900">{formatDate(data.bet.resolveDate)}</p>
+					<p class="text-xs text-blue-700 mt-1">Voting closes and results revealed</p>
+				</div>
+
+				<!-- End of Entry Date (if applicable) -->
+				{#if data.bet.endOfEntryEnabled && data.bet.endOfEntryDate}
+					<div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+						<p class="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-1">End of Entry</p>
+						<p class="text-lg font-semibold text-orange-900">{formatDate(data.bet.endOfEntryDate)}</p>
+						<p class="text-xs text-orange-700 mt-1">No more votes after this date</p>
+					</div>
+				{/if}
+
+				<!-- Prize Section -->
+				{#if data.bet.canBeWon}
+					{#if data.shouldShowWin && data.bet.winItem}
+						<div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+							<p class="text-lg font-bold text-yellow-900 flex items-center gap-2">
+								🏆 Prize
+							</p>
+							<p class="text-sm text-yellow-800 mt-2">{data.bet.winItem}</p>
+						</div>
+					{:else if data.bet.isWinSecret}
+						<div class="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+							<p class="text-sm font-semibold text-purple-900">
+								{randomFunnyMessage}
+							</p>
+						</div>
+					{/if}
+				{/if}
+			</div>
+		</div>
 	</div>
 </div>

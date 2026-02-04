@@ -1,5 +1,10 @@
-<div class="min-h-screen flex items-center justify-center p-4">
-	<div class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+<script>
+	let canBeWon = $state(false);
+	let endOfEntryEnabled = $state(false);
+</script>
+
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+	<div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
 		
 		<div class="bg-gray-50 px-8 py-6 border-b border-gray-200">
 			<h1 class="text-2xl font-bold text-gray-800">Create a new Bet</h1>
@@ -7,6 +12,19 @@
 		</div>
 
 		<form method="POST" class="p-8 space-y-6">
+			<!-- Creator Name -->
+			<div>
+				<label for="creatorName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+				<input 
+					type="text" 
+					name="creatorName" 
+					id="creatorName"
+					required 
+					placeholder="Enter your name" 
+					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+				/>
+			</div>
+
 			<div>
 				<label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
 				<input 
@@ -48,7 +66,95 @@
 				</div>
 			</div>
 
-			<div class="flex items-center justify-between pt-4">
+			<!-- Resolve Date -->
+			<div>
+				<label for="resolveDate" class="block text-sm font-medium text-gray-700 mb-1">Resolve Date</label>
+				<input 
+					type="date" 
+					name="resolveDate" 
+					id="resolveDate"
+					required 
+					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+				/>
+				<p class="text-gray-500 text-sm mt-2">The bet will be in read-only mode after this date. Hidden wins will be revealed.</p>
+			</div>
+
+			<!-- End of Entry Toggle -->
+			<div class="border-t pt-6">
+				<div class="flex items-center gap-3 mb-4">
+					<input 
+						type="checkbox" 
+						name="endOfEntryEnabled" 
+						id="endOfEntryEnabled"
+						value="true"
+						bind:checked={endOfEntryEnabled}
+						class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+					/>
+					<label for="endOfEntryEnabled" class="text-sm font-medium text-gray-700 cursor-pointer">
+						Set an End of Entry Date
+					</label>
+				</div>
+
+				{#if endOfEntryEnabled}
+					<div class="ml-7">
+						<label for="endOfEntryDate" class="block text-sm font-medium text-gray-700 mb-1">End of Entry Date</label>
+						<input 
+							type="date" 
+							name="endOfEntryDate" 
+							id="endOfEntryDate"
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+						/>
+						<p class="text-gray-500 text-sm mt-2">No new votes will be accepted after this date.</p>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Can Be Won Toggle -->
+			<div class="border-t pt-6">
+				<div class="flex items-center gap-3 mb-4">
+					<input 
+						type="checkbox" 
+						name="canBeWon" 
+						id="canBeWon"
+						value="true"
+						bind:checked={canBeWon}
+						class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+					/>
+					<label for="canBeWon" class="text-sm font-medium text-gray-700 cursor-pointer">
+						There is a Prize to Win
+					</label>
+				</div>
+
+				{#if canBeWon}
+					<div class="ml-7 space-y-4">
+						<div>
+							<label for="winItem" class="block text-sm font-medium text-gray-700 mb-1">What can be won?</label>
+							<input 
+								type="text" 
+								name="winItem" 
+								id="winItem"
+								placeholder="e.g. $50 gift card" 
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+							/>
+						</div>
+
+						<div class="flex items-center gap-3">
+							<input 
+								type="checkbox" 
+								name="isWinSecret" 
+								id="isWinSecret"
+								value="true"
+								class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+							/>
+							<label for="isWinSecret" class="text-sm font-medium text-gray-700 cursor-pointer">
+								Keep the prize secret until resolve date
+							</label>
+						</div>
+					</div>
+				{/if}
+			</div>
+
+			<div class="flex items-center justify-between pt-4 border-t">
 				<a href="/" class="text-gray-500 hover:text-gray-800 font-medium transition">
 					Cancel
 				</a>

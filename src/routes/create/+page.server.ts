@@ -10,9 +10,21 @@ export const actions = {
 		const title = data.get('title') as string;
 		const description = data.get('description') as string;
 		const answerType = data.get('answerType') as 'text' | 'number' | 'date';
+		const creatorName = data.get('creatorName') as string;
+		const resolveDate = new Date(data.get('resolveDate') as string);
+		const endOfEntryEnabled = data.get('endOfEntryEnabled') === 'true';
+		const endOfEntryDateStr = data.get('endOfEntryDate') as string;
+		const canBeWon = data.get('canBeWon') === 'true';
+		const winItem = data.get('winItem') as string;
+		const isWinSecret = data.get('isWinSecret') === 'true';
 
-		if (!title || !answerType) {
+		if (!title || !answerType || !creatorName) {
 			return fail(400, { missing: true });
+		}
+
+		let endOfEntryDate: Date | null = null;
+		if (endOfEntryEnabled && endOfEntryDateStr) {
+			endOfEntryDate = new Date(endOfEntryDateStr);
 		}
 
 		const newId = uuidv4();
@@ -22,7 +34,14 @@ export const actions = {
 			id: newId,
 			title,
 			description,
-			answerType
+			answerType,
+			creatorName,
+			resolveDate,
+			endOfEntryDate,
+			endOfEntryEnabled,
+			canBeWon,
+			winItem: canBeWon ? winItem : null,
+			isWinSecret: canBeWon && isWinSecret
 		});
 
 		// Redirect to the list page

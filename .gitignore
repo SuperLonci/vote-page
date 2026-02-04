@@ -28,3 +28,6 @@ vite.config.ts.timestamp-*
 # IDEs
 .vscode
 .idea
+
+# Drizzle migrations
+drizzle
