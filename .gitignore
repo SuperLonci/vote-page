@@ -30,4 +30,4 @@ vite.config.ts.timestamp-*
 .idea
 
 # Drizzle migrations
-drizzle
+/drizzle
