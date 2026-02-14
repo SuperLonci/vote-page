@@ -41,6 +41,73 @@ npm run build
 npm run preview
 ```
 
+## Deployment
+
+### Prerequisites
+
+- Ubuntu server with Docker and Docker Compose installed
+- Git installed
+- Domain/server accessible for the application
+
+### Deployment Steps
+
+1. **Clone the Repository**
+
+   ```sh
+   cd /var/www/vote.lonci.de/public_html
+   git clone <your-github-repo-url> .
+   ```
+
+2. **Fetch Latest Updates from GitHub**
+
+   ```sh
+   cd /var/www/vote.lonci.de/public_html
+   git fetch origin
+   git pull origin main
+   ```
+
+3. **Build the Docker Image**
+
+   ```sh
+   docker-compose build
+   ```
+
+4. **Start the Application**
+
+   ```sh
+   docker-compose up -d
+   ```
+
+   This will:
+   - Build the Docker image if not already built
+   - Start all services defined in `docker-compose.yml`
+   - Run the application in detached mode (background)
+
+5. **Verify Deployment**
+
+   ```sh
+   docker-compose ps
+   docker-compose logs -f
+   ```
+
+### Updating the Deployment
+
+To update your deployment with the latest code:
+
+```sh
+cd /yourfolder
+git pull origin main
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Stopping the Application
+
+```sh
+docker-compose down
+```
+
 ## How to Use
 
 1. Visit the home page and click **"+ Start New Bet"**
