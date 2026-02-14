@@ -1,8 +1,14 @@
 <script>
 	import CharacterLimitInput from '$lib/CharacterLimitInput.svelte';
+	import Modal from '$lib/Modal.svelte';
 	let { data } = $props();
 	let userName = $state('');
 	let answer = $state('');
+	let showModal = $state(false);
+	let modalMessage = $state('');
+	let modalTitle = $state('');
+	let showCancelButton = $state(false);
+	let modalConfirmCallback = $state(null);
 	
 	function formatDate(date) {
 		return new Date(date).toLocaleDateString('en-US', { 
@@ -11,6 +17,39 @@
 			month: 'short', 
 			day: 'numeric' 
 		});
+	}
+
+	function handleFormSubmit(event) {
+		const button = event.submitter;
+		// Only validate if submitting the answer (not viewing results)
+		if (button?.formAction !== '?/viewResults') {
+			if (!userName.trim() || !answer.toString().trim()) {
+				event.preventDefault();
+				modalTitle = 'Missing Information';
+				modalMessage = 'Please enter both your name and answer to submit.';
+				showModal = true;
+			}
+		}
+	}
+
+	function handleSeeResults() {
+		modalTitle = 'View Results';
+		modalMessage = 'Once you view the results, you won\'t be able to submit a vote for this bet.';
+		showCancelButton = true;
+		modalConfirmCallback = () => {
+			// Submit the form to viewResults action
+			const form = document.querySelector('form[action*="submitAnswer"]');
+			if (form) {
+				const formData = new FormData(form);
+				fetch(form.action.replace('submitAnswer', 'viewResults'), {
+					method: 'POST',
+					body: formData
+				}).then(() => {
+					window.location.reload();
+				});
+			}
+		};
+		showModal = true;
 	}
 
 	const funnyMessages = [
@@ -57,7 +96,7 @@
 
 			<!-- Answer Form (only if hasn't answered and not read-only) -->
 			{#if !data.hasAnswered && !data.isReadOnly}
-				<form method="POST" action="?/submitAnswer" class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 space-y-6">
+				<form method="POST" action="?/submitAnswer" onsubmit={handleFormSubmit} class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 space-y-6">
 					<div>
 						<label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
 						<CharacterLimitInput 
@@ -66,7 +105,6 @@
 							id="userName"
 							placeholder="Enter your name"
 							maxlength={32}
-							required={true}
 						/>
 					</div>
 
@@ -80,7 +118,6 @@
 								type="text"
 								placeholder="Enter your answer"
 								maxlength={64}
-								required={true}
 							/>
 						{:else}
 							<input 
@@ -95,12 +132,22 @@
 						{/if}
 					</div>
 
+				<div class="flex items-center justify-between gap-4">
 					<button 
 						type="submit"
-						class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg hover:shadow-xl"
+						class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg hover:shadow-xl"
 					>
 						Submit Answer
 					</button>
+					<span class="text-gray-500 font-medium">or</span>
+					<button 
+						type="button"
+						onclick={handleSeeResults}
+						class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg hover:shadow-xl"
+					>
+						See Results
+					</button>
+				</div>
 				</form>
 	{:else if data.isReadOnly && !data.hasAnswered}
 				<div class="bg-gray-100 border border-gray-300 rounded-lg p-6 text-center">
@@ -221,3 +268,16 @@
 		</div>
 	</div>
 </div>
+
+<Modal 
+	isOpen={showModal}
+	title={modalTitle}
+	message={modalMessage}
+	showCancel={showCancelButton}
+	onConfirm={modalConfirmCallback}
+	onClose={() => {
+		showModal = false;
+		showCancelButton = false;
+		modalConfirmCallback = null;
+	}}
+/>

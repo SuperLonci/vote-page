@@ -92,5 +92,18 @@ export const actions = {
 		});
 
 		return { success: true };
+	},
+	viewResults: async ({ params, cookies }) => {
+		const betId = params.id;
+		const cookieName = `voted_${betId}`;
+		
+		// Set cookie to allow viewing results without voting
+		cookies.set(cookieName, 'true', { 
+			path: '/',
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 365 // 1 year
+		});
+
+		return { success: true };
 	}
 } satisfies Actions;
