@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import CharacterLimitInput from '$lib/CharacterLimitInput.svelte';
 	import Modal from '$lib/Modal.svelte';
 	let { data } = $props();
@@ -8,9 +8,9 @@
 	let modalMessage = $state('');
 	let modalTitle = $state('');
 	let showCancelButton = $state(false);
-	let modalConfirmCallback = $state(null);
+	let modalConfirmCallback = $state<(() => void) | null>(null);
 	
-	function formatDate(date) {
+	function formatDate(date: string | Date): string {
 		return new Date(date).toLocaleDateString('en-US', { 
 			weekday: 'short', 
 			year: 'numeric', 
@@ -19,8 +19,8 @@
 		});
 	}
 
-	function handleFormSubmit(event) {
-		const button = event.submitter;
+	function handleFormSubmit(event: SubmitEvent): void {
+		const button = (event.submitter as HTMLButtonElement);
 		// Only validate if submitting the answer (not viewing results)
 		if (button?.formAction !== '?/viewResults') {
 			if (!userName.trim() || !answer.toString().trim()) {
@@ -32,13 +32,13 @@
 		}
 	}
 
-	function handleSeeResults() {
+	function handleSeeResults(): void {
 		modalTitle = 'View Results';
 		modalMessage = 'Once you view the results, you won\'t be able to submit a vote for this bet.';
 		showCancelButton = true;
 		modalConfirmCallback = () => {
 			// Submit the form to viewResults action
-			const form = document.querySelector('form[action*="submitAnswer"]');
+			const form = document.querySelector('form[action*="submitAnswer"]') as HTMLFormElement;
 			if (form) {
 				const formData = new FormData(form);
 				fetch(form.action.replace('submitAnswer', 'viewResults'), {
@@ -169,9 +169,11 @@
 							<div class="border-l-4 border-indigo-600 pl-4 py-2">
 								<p class="font-semibold text-gray-800">{answer.userName}</p>
 								<p class="text-gray-600">{answer.value}</p>
-								<p class="text-sm text-gray-400">
-									{new Date(answer.createdAt).toLocaleDateString()}
-								</p>
+								{#if answer.createdAt}
+									<p class="text-sm text-gray-400">
+										{new Date(answer.createdAt).toLocaleDateString()}
+									</p>
+								{/if}
 							</div>
 						{/each}
 					</div>
