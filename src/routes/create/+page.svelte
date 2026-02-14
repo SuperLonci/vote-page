@@ -1,6 +1,12 @@
 <script>
+	import CharacterLimitInput from '$lib/CharacterLimitInput.svelte';
+	
 	let canBeWon = $state(false);
 	let endOfEntryEnabled = $state(false);
+	let creatorName = $state('');
+	let title = $state('');
+	let description = $state('');
+	let winItem = $state('');
 </script>
 
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -15,39 +21,43 @@
 			<!-- Creator Name -->
 			<div>
 				<label for="creatorName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-				<input 
-					type="text" 
-					name="creatorName" 
+				<CharacterLimitInput 
+					bind:value={creatorName}
+					name="creatorName"
 					id="creatorName"
-					required 
-					placeholder="Enter your name" 
-					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+					placeholder="Enter your name"
+					maxlength={32}
+					required={true}
 				/>
 			</div>
 
+			<!-- Title -->
 			<div>
 				<label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-				<input 
-					type="text" 
-					name="title" 
+				<CharacterLimitInput 
+					bind:value={title}
+					name="title"
 					id="title"
-					required 
-					placeholder="e.g. How many jellybeans are in the jar?" 
-					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+					placeholder="e.g. How many jellybeans are in the jar?"
+					maxlength={48}
+					required={true}
 				/>
 			</div>
 
+			<!-- Description -->
 			<div>
 				<label for="desc" class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
-				<textarea 
-					name="description" 
+				<CharacterLimitInput 
+					bind:value={description}
+					name="description"
 					id="desc"
-					rows="4"
+					type="textarea"
 					placeholder="Add more context to the bet..."
-					class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm resize-none"
-				></textarea>
+					maxlength={256}
+				/>
 			</div>
 
+			<!-- Answer Type -->
 			<div>
 				<label for="type" class="block text-sm font-medium text-gray-700 mb-1">Answer Type</label>
 				<div class="relative">
@@ -129,15 +139,14 @@
 					<div class="ml-7 space-y-4">
 						<div>
 							<label for="winItem" class="block text-sm font-medium text-gray-700 mb-1">What can be won?</label>
-							<input 
-								type="text" 
-								name="winItem" 
+							<CharacterLimitInput 
+								bind:value={winItem}
+								name="winItem"
 								id="winItem"
-								placeholder="e.g. $50 gift card" 
-								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+								placeholder="e.g. $50 gift card"
+								maxlength={48}
 							/>
 						</div>
-
 						<div class="flex items-center gap-3">
 							<input 
 								type="checkbox" 

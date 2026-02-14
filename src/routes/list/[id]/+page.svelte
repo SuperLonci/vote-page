@@ -1,5 +1,8 @@
 <script>
+	import CharacterLimitInput from '$lib/CharacterLimitInput.svelte';
 	let { data } = $props();
+	let userName = $state('');
+	let answer = $state('');
 	
 	function formatDate(date) {
 		return new Date(date).toLocaleDateString('en-US', { 
@@ -57,26 +60,39 @@
 				<form method="POST" action="?/submitAnswer" class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 space-y-6">
 					<div>
 						<label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-						<input 
-							type="text" 
-							name="userName" 
+						<CharacterLimitInput 
+							bind:value={userName}
+							name="userName"
 							id="userName"
-							required 
-							placeholder="Enter your name" 
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+							placeholder="Enter your name"
+							maxlength={32}
+							required={true}
 						/>
 					</div>
 
 					<div>
 						<label for="value" class="block text-sm font-medium text-gray-700 mb-1">Your Answer</label>
-						<input 
-							type={data.bet.answerType === 'number' ? 'number' : data.bet.answerType === 'date' ? 'date' : 'text'}
-							name="value" 
-							id="value"
-							required 
-							placeholder={data.bet.answerType === 'number' ? 'Enter a number' : data.bet.answerType === 'date' ? 'Select a date' : 'Enter your answer'}
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
-						/>
+						{#if data.bet.answerType === 'text'}
+							<CharacterLimitInput 
+								bind:value={answer}
+								name="value"
+								id="value"
+								type="text"
+								placeholder="Enter your answer"
+								maxlength={64}
+								required={true}
+							/>
+						{:else}
+							<input 
+								type={data.bet.answerType === 'number' ? 'number' : data.bet.answerType === 'date' ? 'date' : 'text'}
+								name="value" 
+								id="value"
+								required 
+								placeholder={data.bet.answerType === 'number' ? 'Enter a number' : data.bet.answerType === 'date' ? 'Select a date' : 'Enter your answer'}
+								bind:value={answer}
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition shadow-sm"
+							/>
+						{/if}
 					</div>
 
 					<button 
@@ -86,7 +102,7 @@
 						Submit Answer
 					</button>
 				</form>
-			{:else if data.isReadOnly && !data.hasAnswered}
+	{:else if data.isReadOnly && !data.hasAnswered}
 				<div class="bg-gray-100 border border-gray-300 rounded-lg p-6 text-center">
 					<p class="text-gray-600 font-medium">
 						This bet is closed. Voting is no longer accepted.

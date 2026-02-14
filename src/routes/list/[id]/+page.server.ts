@@ -24,18 +24,19 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	const cookieName = `voted_${betId}`;
 	const hasAnswered = cookies.get(cookieName) === 'true';
 
-	// 4. If user hasn't answered, censor the values
-	const safeAnswers = hasAnswered 
-		? existingAnswers 
-		: existingAnswers.map(a => ({ ...a, value: 'HIDDEN' }));
-
-	// 5. Determine if the bet is in read-only mode
+	// 4. Determine if the bet is in read-only mode or resolve date has passed
 	const now = new Date();
 	const isReadOnly = now > bet.resolveDate || 
 		(bet.endOfEntryEnabled && bet.endOfEntryDate && now > bet.endOfEntryDate);
+	const isResolved = now > bet.resolveDate;
+
+	// 5. Show answers if user answered or if resolve date has passed
+	const safeAnswers = (hasAnswered || isResolved) 
+		? existingAnswers 
+		: existingAnswers.map(a => ({ ...a, value: 'HIDDEN' }));
 
 	// 6. Determine if the win item should be shown
-	const shouldShowWin = bet.canBeWon && (!bet.isWinSecret || now > bet.resolveDate);
+	const shouldShowWin = bet.canBeWon && (!bet.isWinSecret || isResolved);
 
 	return {
 		bet,
@@ -54,6 +55,12 @@ export const actions = {
 		const betId = params.id;
 
 		if (!userName || !value) return fail(400, { missing: true });
+
+		// Check if user has already voted (prevent re-voting via back button)
+		const cookieName = `voted_${betId}`;
+		if (cookies.get(cookieName) === 'true') {
+			return fail(400, { alreadyVoted: true });
+		}
 
 		// Check if bet is in read-only mode
 		const bet = await db.query.bets.findFirst({
